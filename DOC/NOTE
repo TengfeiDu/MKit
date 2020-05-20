@@ -1,0 +1,563 @@
+########################################################################################################################
+#                                              解决QT的GLib错误                                                        #
+########################################################################################################################
+$ locate libGL.so
+/usr/lib/i386-linux-gnu/mesa/libGL.so.1
+/usr/lib/i386-linux-gnu/mesa/libGL.so.1.2.0
+$ sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1.2.0 /usr/lib/libGL.so
+
+########################################################################################################################
+#                                              MediaPlayer on windows qml                                              #
+########################################################################################################################
+install:
+LAVFilters-0.65.exe
+
+########################################################################################################################
+#                                              ubuntu12.04.5-x64 Qt5.8.0 安装                                           #
+########################################################################################################################
+Error:
+./qtcreator: symbol lookup error: /opt/Qt5.8.0/Tools/QtCreator/lib/Qt/plugins/platformthemes/libqgtk3.so:
+undefined symbol: g_type_ensure
+
+Action:
+This is just a platform theme, simply delete the file /opt/Qt5.8.0/Tools/QtCreator/lib/Qt/plugins/platformthemes/libqgtk3.so
+and it should start.
+
+You will have to tackle another problem regarding "/usr/lib/x86_64-linux-gnu/libstdc++.so.6: version 'GLIBCXX_3.4.18' not found",
+which can be solved by installing this ppa:
+
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt-get update
+sudo apt-get install libstdc++6-4.7-dev
+
+########################################################################################################################
+#                                              让QT支持中文输入法。在~/.profile中添加如下代码                          #
+########################################################################################################################
+export GTK_IM_MODULE=IBus 
+export QT_IM_MODULE=IBus
+#export IBus & 
+
+########################################################################################################################
+#                                              QWebView支持flash                                                       #
+########################################################################################################################
+1.网上下载最新的liunx libflashplayer.so 文件
+2.用sudo cp 命令将其拷贝到（32位）/usr/lib/mozilla/plugins/文件夹下；（64）/usr/lib/mozilla/plugins/
+3.最重要的是需要修改权限：chmod 775 /usr/lib/mozilla/plugins/libflashplayer.so
+*****************************************************************************
+qt的代码部分也需要支持flash的功能：
+QWebSettings::globalSettings()->setAttribute(QWebSettings::PluginsEnabled , true);
+QWebSettings::globalSettings()->setAttribute(QWebSettings::JavascriptEnabled , true);
+//测试的flash网址：
+ui->webView->setUrl(QUrl("http://www.meipai.com/media/604014367"));
+*****************************************************************************
+
+########################################################################################################################
+#                                              windows下时间同步                                                       #
+########################################################################################################################
+::dos文件编码格式GBK！！！
+
+::1、指定外部时间源并与之同步
+w32tm /config /manualpeerlist:"118.114.252.192" /syncfromflags:manual /reliable:yes /update
+
+::/manualpeerlist表示外部时间源服务器列表，多个服务器之间可用空格分隔，210.72.145.44是中国国家授时中心的时间服务器ip地址
+::/syncfromflags:manual表示与指定的外部时间源服务器列表中的服务器进行同步
+::/reliable:yes设置此计算机是一个可靠的时间源。此设置只对域控制器有意义。
+::/update向时间服务发出配置已更改的通知，使更改生效
+
+::2、显示本地时间与目的时间的时间差
+w32tm /stripchart /computer:118.114.252.192 /samples:30 /dataonly
+
+::3、显示目前服务器指定的外部时间源
+w32tm /query /source
+
+::4、恢复Windows Time Service的预设值
+::net stop w32time
+::w32tm /unregister
+::w32tm /register
+::net start w32time
+
+########################################################################################################################
+#                                              windows下dos设置ip                                                      #
+########################################################################################################################
+　　1、更改静态IP地址：
+　　	如： netsh interface ip set address "本地连接" static 192.168.0.61 255.255.255.0 192.168.0.1
+　　2、更改DNS：
+　　	如：netsh interface ip set dns "本地连接" static 61.139.2.69 primary
+
+　　设置动态获取IP地址（DHCP）
+　　	c:/>netsh interface ip set address name="本地连接" sourse=dhcp
+　　设置固定IP
+　　	c:/>netsh interface ip set address name="本地连接" sourse=static addr=192.168.1.2 mask=255.255.255.0 gateway=192.168.1.1 gwnetric=auto
+　　
+参数说明：
+　　1.name：网络连接名称，一般为“本地连接”。你可以在“控制面板”->“网络连接”中看到。
+　　2.source：获取IP的途径。动态获取，则为dhcp，手动设置，则为static。
+　　3.addr：要设置的IP地址。
+　　4.mask：子网掩码。
+　　5.gateway：网关地址。
+　　6.gwmetric：网关跃点数，可以设置为整型数值，也可以设置为“自动”：auto。
+
+########################################################################################################################
+#                                              ubuntu-12.04.5设置ip                                                    #
+########################################################################################################################
+1.修改配置
+	sudo gedit /etc/network/interfaces
+		#auto eth0
+		#iface eth0 inet dhcp
+		auto eth0
+		iface eth0 inet static
+		address 192.168.11.100
+		netmask 255.255.255.0
+		gateway 192.168.11.1
+2.添加DNS
+	sudo gedit /etc/resolvconf/resolv.conf.d/base
+		nameserver 8.8.8.8
+3.重启
+	sudo reboot
+
+########################################################################################################################
+#                                                Linux下opencv249+QT移植                                               #
+########################################################################################################################
+sudo apt-get install libv4l-0 libv4l-dev libgtk2.0-dev cmake g++
+1.编译安装opencv249
+2.在QT   .pro文件添加下面内容：
+	LIBS    +=-ljpeg `pkg-config --cflags --libs opencv`
+
+########################################################################################################################
+#                                                windows破解登录密码                                                   #
+########################################################################################################################
+1.进入带命令行的安全模式
+2.net user  newuser newpasswd /add
+3.net user localgroup administrators newuser /add
+4.重启
+
+########################################################################################################################
+#                                                Linux关闭锁屏+更新                                                    #
+########################################################################################################################
+gsettings set org.gnome.desktop.screensaver idle-activation-enabled false
+gsettings set org.gnome.desktop.screensaver lock-enabled false
+gsettings set org.gnome.desktop.lockdown disable-lock-screen 'true'
+禁止灭屏+禁止灭屏后锁屏+禁止通过图形界面设置
+
+禁止自动更新：
+vi /etc/apt/apt.conf.d/50unattended-upgrades 
+Unattended-Upgrade::Allowed-Origins {
+// "${distro_id}:${distro_codename}-security";
+// "${distro_id}:${distro_codename}-updates";
+// "${distro_id}:${distro_codename}-proposed";
+// "${distro_id}:${distro_codename}-backports";
+}; 
+vi /etc/apt/apt.conf.d/10periodic
+APT::Periodic::Update-Package-Lists "1"; 					//显示更新包列表 0表示停用设置
+APT::Periodic::Download-Upgradeable-Packages "1"; 				//下载更新包 0表示停用设置
+APT::Periodic::AutocleanInterval "7"; 						//7日自动删除 
+APT::Periodic::Unattended-Upgrade "1"; 						//启用自动更新 0表示停用自动更新
+说明：用shell实现以上设置 一次性生效
+
+[Desktop Entry]
+Encoding=UTF-8
+Name=myapp
+Comment=comment
+Exec=/home/ipst/myapp.sh
+Terminal=false
+Type=Application
+Hidden=false
+X-GNOME-Autostart-enabled=true
+
+########################################################################################################################
+#                                                    Linux svn client                                                  #
+########################################################################################################################
+apt-get install subversion
+//view help page ...
+svn help
+
+//download from internet server ...
+svn co --username dutengfei --password dutengfei https://192.168.0.225/svn/MyRepositories/open ./myWorkSpace
+
+//send file to internet server ...
+cd ./myWorkSpace
+svn add ./*
+svn commit -m "又添加了一個文本。。。" ./
+
+//修改过滤文件
+cat ~/.subversion/config
+global-ignores = *~
+
+########################################################################################################################
+#                                                      Linux uuid                                                      #
+########################################################################################################################
+blkid /dev/sda1
+
+########################################################################################################################
+#                                                      USB硬件端口绑定方法                                             #
+########################################################################################################################
+1.USB插入设备
+2.lusb查看设备id信息
+3.创建映射文件 如: USB_serial.rules
+内容：KERNEL=="ttyUSB*", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="7523", MODE:="0777", SYMLINK+="USB_serial"  
+或者：KERNEL=="lp*", ATTRS{idVendor}=="0519", ATTRS{idProduct}=="2013", MODE:="0777", SYMLINK+="USB_bqPrinter"
+或者：ATTRS{idVendor}=="148f", ATTRS{idProduct}=="3070", MODE:="0777", SYMLINK+="USB_WIFI", RUN+="/home/ipst/USB_WIFI.sh"
+4.sudo cp -rf ./USB_serial.rules /etc/udev/rules.d/
+5.重新插入USB设备
+6.代码入口: int open("/dev/USB_serial", int flags);
+7.这时可插入多个同类型的设备，kernel会 自动 将已经映射过的端口 绑定 到指定设备，解决系统重启 设备文件错位问题
+
+根据主板USB端口绑定：
+udevadm info --query=all --name=/dev/ttyUSB0
+SUBSYSTEM=="tty", ENV{ID_TYPE}=="generic", ENV{ID_PATH}=="pci-0000:00:14.0-usb-0:1:1.0", SYMLINK+="USB_serialPort"
+
+########################################################################################################################
+#                                                     windows切换共享登录帐号                                          #
+########################################################################################################################
+net use * /del /y
+net use \\192.168.0.135 /user:administrator ADMINISTRATOR /persistent:yes
+
+########################################################################################################################
+#                                                     ubuntu12.04远程桌面配置                                          #
+########################################################################################################################
+1.sudo apt-get install xrdp
+2.echo "gnome-session --session=ubuntu-2d" > ~/.xsession
+3.sudo /etc/init.d/xrdp restart
+4.win+R 打开 mstsc ,默认端口3389
+
+########################################################################################################################
+#                                                     ubuntu12.04双网卡路由                                            #
+########################################################################################################################
+1.
+	sudo gedit /etc/rc.local
+	route add default gw 192.168.1.1 eth0
+	route add -net 192.168.1.0/24 gw 192.168.1.1 eth0
+	route add -net 192.168.2.0/24 gw 192.168.2.254 eth1
+	route add -net 192.33.0.0/16 gw 192.168.2.254 eth1
+2.
+	sudo reboot
+	
+########################################################################################################################
+#                                                     ubuntu12.04 lamp                                                 #
+########################################################################################################################
+
+sudo apt-get install apache2 mysql-server mysql-client php5 php5-gd php5-mysql
+sudo apt-get install phpmyadmin
+
+shell 登录
+	mysql -uroot -proot
+添加新用户
+	create user 'ipst'@'%' identified by 'ipst';
+添加所有数据库的访问权限
+	grant all privileges on *.* to 'ipst'@'%' identified by 'ipst';
+	grant all privileges on *.* to 'ipst'@'127.0.0.1' identified by 'ipst';
+	flush privileges;
+添加指定用户 到指定数据库的权限
+	grant all privileges on MyDatabaseName.* to 'ipst'@'127.0.0.1' identified by 'ipst';
+高级权限
+	grant select, update, drop on MyDatabaseName.MyColumnName to 'ipst'@'%' identified by 'ipst';
+其他sql
+	create database ipst;
+	source ./MyDatabase.sql
+	show databases;
+	show tables;
+	describe MyTableName;
+	use MyDatabaseName;
+修改mysql配置,允许外网访问
+	sudo gedit /etc/mysql/my.cnf
+	#bind-address 127.0.0.1
+	
+########################################################################################################################
+#                                                     gsoap Client & Server c++                                                        #
+########################################################################################################################
+-----------------
+
+     CLIENT
+
+-----------------
+
+mingw Qt5.4.2:
+	cd xxx/gsoap-2.8/gsoap/bin/win32
+	
+	//-o specify output file
+	//-n change namespace
+	//-s no STL lib
+	wsdl2h.exe -o ./1.h -nws -s http://www.webxml.com.cn/WebServices/WeatherWebService.asmx?wsdl
+	
+	//-i output C++ API by inherited from soap struct
+	//-C client-side API output only
+	//-x no xml file output
+	soapcpp2.exe -i -C -x ./1.h -I../../import
+-------------------------------------------------
+in .pro file:
+HEADERS +=\
+    $$PWD/soapH.h \
+    $$PWD/soapStub.h \
+    $$PWD/soapWeatherWebServiceSoapProxy.h \
+    $$PWD/stdsoap2.h
+SOURCES +=\
+    $$PWD/soapC.cpp \
+    $$PWD/soapWeatherWebServiceSoapProxy.cpp \
+    $$PWD/stdsoap2.cpp \
+    $$PWD/WeatherWebServiceSoap.nsmap.cpp
+LIBS += -lwsock32
+
+#do NOT add this line below in .pro file !!!
+#CONFIG += C++11
+-------------------------------------------------
+EXAMPLE:
+		//构造soap对象,设置编码格式 UFT8
+    WeatherWebServiceSoapProxy *sp = new WeatherWebServiceSoapProxy((soap_mode)SOAP_C_UTFSTRING);
+    //准备输入参数
+    _ws1__getSupportCity *req = new _ws1__getSupportCity();
+    req->byProvinceName = "北京";
+    //准备接收对象
+    _ws1__getSupportCityResponse ret;
+		//执行
+    qDebug() << sp->getSupportCity(req, ret);
+    //获取结果
+    QStringList ret_beijing;
+    for(int i = 0; i < ret.getSupportCityResult->__sizestring; i++){
+        ret_beijing << QString(ret.getSupportCityResult->string[i]);
+    }
+    qDebug() << ret_beijing;
+-------------------------------------------------
+-----------------
+
+     SERVER
+
+-----------------
+1.Write 1.h content:
+
+    int ns2__add(int num1, int num2, int* result );
+    int ns2__sub(int num1, int num2, int* result );
+    int ns2__mult( int num1, int num2, int *result);
+    int ns2__divid( int num1, int num2, int *result);
+
+2.Generate soap file:
+
+    soapcpp2.exe -i -r -SL 1.h
+
+3.Rename file "ns2.nsmap" to "ns2.nsmap.cpp"
+
+    Now you have files:
+
+    1.h
+    ns2.add.req.xml
+    ns2.add.res.xml
+    ns2.divid.req.xml
+    ns2.divid.res.xml
+    ns2.mult.req.xml
+    ns2.mult.res.xml
+    ns2.nsmap.cpp
+    ns2.sub.req.xml
+    ns2.sub.res.xml
+    ns2.wsdl        //can be used for SoapUI
+    ns2.xsd
+    soapC.cpp
+    soapcpp2.exe
+    soapH.h
+    soapReadme.md
+    soapService.cpp
+    soapService.h
+    soapStub.h
+    stdsoap2.cpp
+    stdsoap2.h
+    wsdl2h.exe
+
+4.Create .pri file, content:
+
+    LIBS +=  -lwsock32
+    INCLUDEPATH += $$PWD
+
+    SOURCES += \
+                    $$PWD/soapC.cpp             \
+                    $$PWD/stdsoap2.cpp		\
+                    $$PWD/soapService.cpp       \
+                    $$PWD/ns2.nsmap.cpp
+    HEADERS += \
+                    $$PWD/1.h         \
+                    $$PWD/soapH.h     \
+                    $$PWD/soapStub.h  \
+                    $$PWD/stdsoap2.h  \
+                    $$PWD/soapService.h
+
+5.Implement your soap method for "soapService.h" in file "soapService.cpp", like:
+
+    int Service::add(int num1, int num2, int *result)
+    {
+        (*result) = num1 + num2;
+        return SOAP_OK;
+    }
+    int Service::sub(int num1, int num2, int *result)
+    {
+        (*result) = num1 - num2;
+        return SOAP_OK;
+    }
+    int Service::mult(int num1, int num2, int *result)
+    {
+        (*result) = num1 * num2;
+        return SOAP_OK;
+    }
+    int Service::divid(int num1, int num2, int *result)
+    {
+        (*result) = num1 / num2;
+        return SOAP_OK;
+    }
+
+6.Write your main.cpp like:
+
+    #include "soapService.h"
+
+    void *process_request(void *arg)
+    {
+      Service *service = (Service*)arg;
+      if (service)
+      {
+        service->serve();
+        service->destroy(); /* clean up */
+        delete service;
+      }
+      MDG << (uint)arg
+          << QThread::currentThread();
+      return NULL;
+    }
+
+    void start_soap(int port = 9999)
+    {
+        Service service(SOAP_IO_KEEPALIVE);                      /* enable HTTP kee-alive */
+        service.send_timeout = service.recv_timeout = 5;         /* 5 sec socket idle timeout */
+        service.transfer_timeout = 30;                           /* 30 sec message transfer timeout */
+        SOAP_SOCKET m = service.bind(NULL, port, 100);           /* master socket */
+        if (soap_valid_socket(m))
+        {
+          while (soap_valid_socket(service.accept()))
+          {
+            void *arg = (void*)service.copy();
+            QtConcurrent::run(process_request,arg);
+          }
+        }
+        uchar err[1024] = {0};
+        service.soap_sprint_fault((char *)err,M_SIZE_ARRAY_ELEMENTS(err));
+        MDG << err;
+        service.destroy(); /* clean up */
+    }
+
+    int main(int argc, char *argv[])
+    {
+        QApplication a(argc, argv);
+
+        MainWindow w;
+        w.show();
+
+        QtConcurrent::run(start_soap,20000);
+
+        return a.exec();
+    }
+
+########################################################################################################################
+#                                                     ubuntu12.04.5 python2 soap c++                                   #
+########################################################################################################################
+1.
+    sudo apt-get install python-dev python-pip
+    sudo pip install suds
+
+    if you get "Cannot fetch index base URL http://pypi.python.org/simple/" ,then create a config file and set the data:
+
+    touch ~/.pip/pip.conf
+
+    [global]
+    index-url=http://pypi.douban.com/simple/
+
+-------------------------------------------------
+EXAMPLE:(hello.py)
+
+    #coding=UTF-8
+    from suds.client import Client as Soap
+    from suds.xsd.doctor import ImportDoctor, Import
+    import sys,time,datetime
+
+    def MyPrintf(data):
+        print datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + " " + str(sys._getframe().f_lineno) + " " + data
+
+    def func_test():
+        imp = Import('http://www.w3.org/2001/XMLSchema', location ='http://www.w3.org/2001/XMLSchema.xsd')
+        imp.filter.add('http://WebXml.com.cn/')
+        doctor = ImportDoctor(imp)
+        soap = Soap('http://www.webxml.com.cn/WebServices/WeatherWS.asmx?wsdl',doctor = doctor)
+        print soap
+        ok = soap.service.getWeather("成都".decode("utf-8"))
+        for i in ok.string:
+            print i
+        return ok
+-------------------------------------------------
+On c++ side:
+    LIBS += -I/usr/include/python2.7 -lpython2.7
+
+    #include <python2.7/Python.h>
+
+    Py_Initialize();
+    PyRun_SimpleString("import sys");
+    PyRun_SimpleString("reload(sys);sys.setdefaultencoding('utf-8')");
+    //PyRun_SimpleString("print sys.getdefaultencoding()");
+    PyRun_SimpleString("sys.path.append('./')");
+
+    PyObject* pModule = PyImport_ImportModule("hello");
+    PyObject* pFunhello= PyObject_GetAttrString(pModule,"func_test");
+    PyObject* pRet = PyObject_CallFunction(pFunhello,NULL);
+
+    char *res = NULL;
+    PyArg_Parse(pRet,"s",&res);
+    qDebug() << __LINE__
+             << __FILE__
+             << QString(res);
+
+    Py_Finalize();
+
+########################################################################################################################
+#                                                     windows cmd 用户管理                                             #
+########################################################################################################################
+查看用户
+	net user
+查看用户信息
+	net user A
+查看本地组
+	net localgroup
+查看组成员
+	net localgroup MyGroup
+添加用户
+	net user A A /add /expires:never /passwordchg:no
+添加组
+	net localgroup MyGroup /add
+添加用户到组
+	net localgroup MyGroup A /add
+	
+共享
+	net share qt="c:\Qt" /grant:user1,full /grant:user2,full /grant:MyGroup,full /unlimited
+
+        ::::::::::::::::::::::::::::::::::::::::::::::::::
+        cd /
+        ::::::::::::::::::::::配置:::::::::::::::::::::::::
+        set addr=\\192.168.0.135
+        set account=manager
+        set passwd=manager
+        ::::::::::::::::::::::下面不用改:::::::::::::::::::
+        net use * /del /y
+        net use %addr% /user:%account% %passwd% /persistent:yes
+        net use %addr% /savecred
+        start %addr%
+        ::pause
+        exit
+        :::::::::::::::::::::::::::::::::::::::::::::::::::
+
+########################################################################################################################
+#                                                     windows python2.7                                                #
+########################################################################################################################
+
+Example shows how to load dll using ctypes :
+
+    import ctypes,win32api,os
+
+    os.environ['path'] += ';I:\Mypath'
+    libc = ctypes.cdll.LoadLibrary('Mydll.dll')
+    do more ...
+    win32api.FreeLibrary(libc._handle)
+
+"""
+https://www.lfd.uci.edu/~gohlke/pythonlibs/#pyqt4
+"""

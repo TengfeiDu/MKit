@@ -1,0 +1,23 @@
+QWidget{
+    background-color: rgb(200, 255, 255);
+}
+QToolButton{
+    background-color: rgb(70, 70, 79);
+    border: 2px solid #000000;
+    border-radius: 12px;
+    font: 75 24pt "宋体";
+    color: white;
+}
+QTextBrowser{
+    background-color: rgb(70, 70, 79);
+    border: 2px solid #000000;
+    border-radius: 12px;
+    font: 75 18pt "宋体";
+    color: white;
+}
+QToolButton:hover{
+    background-color: rgb(170, 162, 152);
+}
+QLabel{
+    font: 75 24pt "宋体";
+}
